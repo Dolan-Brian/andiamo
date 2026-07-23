@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Andata — Follow the Match. See the Country.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --notte: #14213D;
+    --notte-deep: #0D1730;
+    --carta: #EDE4D3;
+    --terra: #B5541F;
+    --verde: #3A6B4C;
+    --oro: #D9A441;
+    --inchiostro: #241E19;
+    --carta-dim: #E1D5BE;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--notte);
+    color: var(--carta);
+    line-height: 1.5;
+  }
+
+  .display { font-family: 'Fraunces', serif; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    min-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 120% 60% at 50% 0%, rgba(217,164,65,0.10), transparent 60%),
+      var(--notte);
+  }
+
+  .floodlight {
+    position: absolute;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 900px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(217,164,65,0.14) 0%, rgba(217,164,65,0) 65%);
+    animation: pulse 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--oro);
+    margin-bottom: 1.4rem;
+    z-index: 1;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.6rem, 6vw, 5rem);
+    font-weight: 600;
+    line-height: 1.05;
+    max-width: 900px;
+    z-index: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--oro);
+  }
+
+  .hero p {
+    margin-top: 1.5rem;
+    font-size: 1.15rem;
+    color: var(--carta-dim);
+    max-width: 560px;
+    z-index: 1;
+  }
+
+  .scroll-cue {
+    margin-top: 3rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--carta-dim);
+    z-index: 1;
+    opacity: 0.7;
+  }
+
+  /* ---------- PLANNER FORM ---------- */
+  .planner {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  .ticket-window {
+    background: var(--carta);
+    color: var(--inchiostro);
+    border-radius: 4px;
+    padding: 2.75rem 2.5rem;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+    position: relative;
+  }
+
+  .ticket-window::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 2.5rem; right: 2.5rem;
+    height: 0;
+    border-top: 2px dashed rgba(36,30,25,0.18);
+  }
+
+  .window-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--terra);
+    margin-bottom: 0.5rem;
+  }
+
+  .window-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 1.8rem;
+  }
+
+  .field-group { margin-bottom: 1.6rem; }
+
+  .field-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--inchiostro);
+  }
+
+  select, input[type="date"] {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    border: 1.5px solid rgba(36,30,25,0.2);
+    border-radius: 3px;
+    background: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: var(--inchiostro);
+  }
+
+  select:focus, input:focus {
+    outline: 2px solid var(--verde);
+    outline-offset: 1px;
+  }
+
+  .date-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .chip {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1.5px solid rgba(36,30,25,0.22);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: var(--inchiostro);
+  }
+
+  .chip:focus-visible {
+    outline: 2px solid var(--verde);
+    outline-offset: 2px;
+  }
+
+  .chip.active {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: #fff;
+  }
+
+  .generate-btn {
+    width: 100%;
+    margin-top: 0.8rem;
+    padding: 1rem;
+    background: var(--terra);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .generate-btn:hover { background: #9c4a1e; }
+  .generate-btn:disabled { background: #999; cursor: not-allowed; }
+  .generate-btn:focus-visible { outline: 3px solid var(--oro); outline-offset: 2px; }
+
+  .error-note {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--terra);
+    display: none;
+  }
+
+  /* ---------- LOADING ---------- */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--carta-dim);
+  }
+
+  .loading.active { display: block; }
+
+  .loading-pulse {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--oro);
+    margin: 0 auto 1.2rem;
+    animation: loadpulse 1.1s ease-in-out infinite;
+  }
+
+  @keyframes loadpulse {
+    0%, 100% { transform: scale(0.7); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 1; }
+  }
+
+  .loading p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+  }
+
+  /* ---------- OUTPUT ---------- */
+  .output {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 1.5rem 6rem;
+    display: none;
+  }
+
+  .output.active { display: block; }
+
+  .overview-card {
+    background: var(--carta);
+    color: var(--inchiostro);
+    border-radius: 4px;
+    padding: 2.2rem 2.4rem;
+    margin-bottom: 2rem;
+  }
+
+  .overview-card .window-label { color: var(--verde); }
+
+  .overview-card p {
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .day-ticket {
+    background: var(--carta);
+    color: var(--inchiostro);
+    border-radius: 4px;
+    margin-bottom: 1.4rem;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+  }
+
+  .day-ticket::after {
+    content: "";
+    position: absolute;
+    left: 128px;
+    top: 0; bottom: 0;
+    width: 0;
+    border-left: 2px dashed rgba(36,30,25,0.2);
+  }
+
+  .day-ticket::before {
+    content: "";
+    position: absolute;
+    left: 122px;
+    top: -10px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--notte);
+    box-shadow: 0 calc(100% + 10px) 0 var(--notte);
+  }
+
+  .ticket-stub {
+    width: 128px;
+    flex-shrink: 0;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+  }
+
+  .ticket-stub.match-day { background: rgba(181,84,32,0.08); }
+
+  .stub-stripe {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--verde);
+  }
+
+  .ticket-stub.match-day .stub-stripe { background: var(--terra); }
+
+  .stub-date-num {
+    font-family: 'Fraunces', serif;
+    font-size: 1.9rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .stub-date-month {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+    color: var(--terra);
+  }
+
+  .ticket-body {
+    padding: 1.6rem 1.8rem;
+    flex: 1;
+  }
+
+  .day-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.7rem;
+  }
+
+  .match-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    background: var(--terra);
+    color: #fff;
+    padding: 0.3rem 0.7rem;
+    border-radius: 3px;
+    margin-bottom: 0.8rem;
+  }
+
+  .day-activities {
+    list-style: none;
+  }
+
+  .day-activities li {
+    font-size: 0.92rem;
+    padding: 0.3rem 0 0.3rem 1.1rem;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .day-activities li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--verde);
+  }
+
+  .practical-card {
+    background: var(--notte-deep);
+    border: 1.5px solid rgba(217,164,65,0.25);
+    border-radius: 4px;
+    padding: 2rem 2.2rem;
+    margin-top: 2rem;
+  }
+
+  .practical-card .window-label { color: var(--oro); }
+
+  .practical-card ul {
+    list-style: none;
+    margin-top: 0.8rem;
+  }
+
+  .practical-card li {
+    font-size: 0.92rem;
+    color: var(--carta-dim);
+    padding: 0.35rem 0 0.35rem 1.1rem;
+    position: relative;
+  }
+
+  .practical-card li::before {
+    content: "✈";
+    position: absolute;
+    left: 0;
+    color: var(--oro);
+    font-size: 0.75rem;
+  }
+
+  footer {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--carta-dim);
+    opacity: 0.6;
+  }
+
+  @media (max-width: 600px) {
+    .date-row { grid-template-columns: 1fr; }
+    .day-ticket { flex-direction: column; }
+    .ticket-stub { width: 100%; flex-direction: row; gap: 0.6rem; padding: 1rem 1.5rem; }
+    .day-ticket::after, .day-ticket::before { display: none; }
+    .stub-date-num { font-size: 1.4rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floodlight, .loading-pulse { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+  <section class="hero">
+    <div class="floodlight"></div>
+    <div class="eyebrow">Andata — Serie A Trip Planner</div>
+    <h1 class="display">Follow the <em>match.</em><br>See the country.</h1>
+    <p>Pick a club. Pick your dates. Get a real Italian itinerary built around the fixtures — food, cities, and match days sequenced properly.</p>
+    <div class="scroll-cue">↓ build your trip</div>
+  </section>
+
+  <section class="planner" id="planner">
+    <div class="ticket-window">
+      <div class="window-label">Sportello — Booking Window</div>
+      <div class="window-title">Plan your trip</div>
+
+      <div class="field-group">
+        <label class="field-label" for="team">Which club are you following?</label>
+        <select id="team"></select>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Travel window</label>
+        <div class="date-row">
+          <input type="date" id="dateFrom">
+          <input type="date" id="dateTo">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">What matters most on this trip?</label>
+        <div class="chip-row" id="interests">
+          <button class="chip" type="button" data-val="food and wine">Food &amp; Wine</button>
+          <button class="chip" type="button" data-val="architecture and history">Architecture &amp; History</button>
+          <button class="chip" type="button" data-val="art and museums">Art &amp; Museums</button>
+          <button class="chip" type="button" data-val="lake or coastal views">Lake / Coastal Views</button>
+          <button class="chip" type="button" data-val="nightlife">Nightlife</button>
+          <button class="chip" type="button" data-val="relaxed pace">Relaxed Pace</button>
+          <button class="chip" type="button" data-val="packed schedule">Packed Schedule</button>
+        </div>
+      </div>
+
+      <button class="generate-btn" id="generateBtn">Andiamo</button>
+      <p class="error-note" id="errorNote"></p>
+    </div>
+  </section>
+
+  <div class="loading" id="loading">
+    <div class="loading-pulse"></div>
+    <p>BUILDING YOUR ITINERARY…</p>
+  </div>
+
+  <section class="output" id="output"></section>
+
+  <footer>ANDATA · BUILT WITH THE ANTHROPIC API &amp; FOOTBALL-DATA.ORG</footer>
+
+<script>
+  const TEAMS = [
+    "AC Milan","AC Monza","ACF Fiorentina","AS Roma","Atalanta BC",
+    "Bologna FC 1909","Cagliari Calcio","Como 1907","FC Internazionale Milano",
+    "Frosinone Calcio","Genoa CFC","Juventus FC","Parma Calcio 1913",
+    "SS Lazio","SSC Napoli","Torino FC","US Lecce","US Sassuolo Calcio",
+    "Udinese Calcio","Venezia FC"
+  ];
+
+  const teamSelect = document.getElementById('team');
+  TEAMS.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t;
+    teamSelect.appendChild(opt);
+  });
+
+  // Default dates: today through +14 days
+  const today = new Date();
+  const twoWeeks = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
+  document.getElementById('dateFrom').value = today.toISOString().split('T')[0];
+  document.getElementById('dateTo').value = twoWeeks.toISOString().split('T')[0];
+
+  const selectedInterests = new Set();
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      chip.classList.toggle('active');
+      if (chip.classList.contains('active')) {
+        selectedInterests.add(chip.dataset.val);
+      } else {
+        selectedInterests.delete(chip.dataset.val);
+      }
+    });
+  });
+
+  const monthNames = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+
+  function renderOutput(data) {
+    const output = document.getElementById('output');
+    output.innerHTML = '';
+
+    const overview = document.createElement('div');
+    overview.className = 'overview-card';
+    overview.innerHTML = `
+      <div class="window-label">Il Viaggio — Trip Overview</div>
+      <p>${data.trip_overview}</p>
+    `;
+    output.appendChild(overview);
+
+    (data.days || []).forEach(day => {
+      const d = new Date(day.date + 'T00:00:00');
+      const dateNum = d.getDate();
+      const month = monthNames[d.getMonth()];
+
+      const ticket = document.createElement('div');
+      ticket.className = 'day-ticket';
+
+      const matchBadge = day.is_match_day && day.match
+        ? `<div class="match-badge">⚽ ${day.match.home} vs ${day.match.away} · ${day.match.stadium}</div>`
+        : '';
+
+      const activities = (day.activities || [])
+        .map(a => `<li>${a}</li>`)
+        .join('');
+
+      ticket.innerHTML = `
+        <div class="ticket-stub ${day.is_match_day ? 'match-day' : ''}">
+          <div class="stub-stripe"></div>
+          <div class="stub-date-num">${dateNum}</div>
+          <div class="stub-date-month">${month}</div>
+        </div>
+        <div class="ticket-body">
+          <div class="day-title">${day.title}</div>
+          ${matchBadge}
+          <ul class="day-activities">${activities}</ul>
+        </div>
+      `;
+      output.appendChild(ticket);
+    });
+
+    if (data.practical_notes && data.practical_notes.length) {
+      const practical = document.createElement('div');
+      practical.className = 'practical-card';
+      const notes = data.practical_notes.map(n => `<li>${n}</li>`).join('');
+      practical.innerHTML = `
+        <div class="window-label">Note Pratiche — Practical Notes</div>
+        <ul>${notes}</ul>
+      `;
+      output.appendChild(practical);
+    }
+
+    output.classList.add('active');
+    output.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  document.getElementById('generateBtn').addEventListener('click', async () => {
+    const team = teamSelect.value;
+    const dateFrom = document.getElementById('dateFrom').value;
+    const dateTo = document.getElementById('dateTo').value;
+    const interests = Array.from(selectedInterests).join(', ') || 'general Italian travel';
+    const errorNote = document.getElementById('errorNote');
+    const btn = document.getElementById('generateBtn');
+    const loading = document.getElementById('loading');
+    const output = document.getElementById('output');
+
+    errorNote.style.display = 'none';
+    output.classList.remove('active');
+
+    if (!dateFrom || !dateTo) {
+      errorNote.textContent = 'Please choose a travel window.';
+      errorNote.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+    loading.classList.add('active');
+
+    try {
+      const res = await fetch('/.netlify/functions/generate-brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ team, dateFrom, dateTo, interests })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || 'Something went wrong generating your trip brief.');
+      }
+
+      const data = await res.json();
+
+      if (!data.days || data.days.length === 0) {
+        errorNote.textContent = `No ${team} matches found in this window. Try widening your travel dates.`;
+        errorNote.style.display = 'block';
+      } else {
+        renderOutput(data);
+      }
+    } catch (err) {
+      errorNote.textContent = 'Could not generate a trip brief right now. Please try again.';
+      errorNote.style.display = 'block';
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Andiamo';
+      loading.classList.remove('active');
+    }
+  });
+</script>
+
+</body>
+</html>
