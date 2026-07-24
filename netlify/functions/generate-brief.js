@@ -166,6 +166,14 @@ ${matchesText}`;
     }
 
     const claudeData = await claudeRes.json();
+
+    // Log real token usage - Claude's API returns exact counts for every call
+    if (claudeData.usage) {
+      console.log(
+        `Token usage - Input: ${claudeData.usage.input_tokens}, Output: ${claudeData.usage.output_tokens}`
+      );
+    }
+
     let rawText = claudeData.content[0].text.trim();
 
     // Strip markdown fences if Claude includes them despite instructions
