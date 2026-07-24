@@ -297,29 +297,10 @@
     color: var(--inchiostro);
     border-radius: 4px;
     margin-bottom: 1.4rem;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     display: flex;
-  }
-
-  .day-ticket::after {
-    content: "";
-    position: absolute;
-    left: 128px;
-    top: 0; bottom: 0;
-    width: 0;
-    border-left: 2px dashed rgba(36,30,25,0.2);
-  }
-
-  .day-ticket::before {
-    content: "";
-    position: absolute;
-    left: 122px;
-    top: -10px;
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    background: var(--notte);
-    box-shadow: 0 calc(100% + 10px) 0 var(--notte);
+    box-shadow: 0 12px 28px -14px rgba(0,0,0,0.4);
   }
 
   .ticket-stub {
@@ -332,23 +313,46 @@
     justify-content: center;
     text-align: center;
     position: relative;
+    border-right: 3px dashed rgba(36,30,25,0.3);
   }
 
-  .ticket-stub.match-day { background: rgba(181,84,32,0.08); }
+  .stub-perf {
+    position: absolute;
+    right: -8px;
+    top: 0;
+    bottom: 0;
+    width: 16px;
+    background-image: radial-gradient(circle 8px, var(--notte) 8px, transparent 8.5px);
+    background-size: 16px 24px;
+    background-repeat: repeat-y;
+    background-position: center -4px;
+  }
+
+  .ticket-stub.match-day { background: rgba(181,84,32,0.1); }
 
   .stub-stripe {
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 4px;
+    height: 5px;
     background: var(--verde);
+    border-radius: 4px 0 0 0;
   }
 
   .ticket-stub.match-day .stub-stripe { background: var(--terra); }
 
+  .stub-day-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    color: var(--terra);
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+  }
+
   .stub-date-num {
     font-family: 'Fraunces', serif;
-    font-size: 1.9rem;
-    font-weight: 600;
+    font-size: 2.2rem;
+    font-weight: 700;
     line-height: 1;
   }
 
@@ -357,8 +361,9 @@
     font-size: 0.68rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    margin-top: 0.2rem;
-    color: var(--terra);
+    margin-top: 0.3rem;
+    color: var(--inchiostro);
+    opacity: 0.6;
   }
 
   .ticket-body {
@@ -446,9 +451,18 @@
   @media (max-width: 600px) {
     .date-row { grid-template-columns: 1fr; }
     .day-ticket { flex-direction: column; }
-    .ticket-stub { width: 100%; flex-direction: row; gap: 0.6rem; padding: 1rem 1.5rem; }
-    .day-ticket::after, .day-ticket::before { display: none; }
-    .stub-date-num { font-size: 1.4rem; }
+    .ticket-stub {
+      width: 100%;
+      flex-direction: row;
+      gap: 0.8rem;
+      padding: 1rem 1.5rem;
+      border-right: none;
+      border-bottom: 3px dashed rgba(36,30,25,0.3);
+    }
+    .stub-perf { display: none; }
+    .stub-date-num { font-size: 1.6rem; }
+    .stub-day-name { margin-bottom: 0; }
+    .stub-date-month { margin-top: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -547,6 +561,7 @@
   });
 
   const monthNames = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  const dayNames = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
 
   function renderOutput(data) {
     const output = document.getElementById('output');
@@ -564,6 +579,7 @@
       const d = new Date(day.date + 'T00:00:00');
       const dateNum = d.getDate();
       const month = monthNames[d.getMonth()];
+      const dayName = dayNames[d.getDay()];
 
       const ticket = document.createElement('div');
       ticket.className = 'day-ticket';
@@ -579,8 +595,10 @@
       ticket.innerHTML = `
         <div class="ticket-stub ${day.is_match_day ? 'match-day' : ''}">
           <div class="stub-stripe"></div>
+          <div class="stub-day-name">${dayName}</div>
           <div class="stub-date-num">${dateNum}</div>
           <div class="stub-date-month">${month}</div>
+          <div class="stub-perf"></div>
         </div>
         <div class="ticket-body">
           <div class="day-title">${day.title}</div>
