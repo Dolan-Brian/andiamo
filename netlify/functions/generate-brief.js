@@ -59,7 +59,7 @@ exports.handler = async function (event) {
     const allMatches = fixturesData.matches || [];
 
     // --- Step 2: filter to the selected team, enrich with city/stadium ---
-    const teamMatches = allMatches
+    let teamMatches = allMatches
       .filter((m) => m.homeTeam.name === team || m.awayTeam.name === team)
       .map((m) => {
         const venueInfo = getTeamInfo(m.homeTeam.name);
@@ -72,18 +72,49 @@ exports.handler = async function (event) {
         };
       });
 
+    let isFallback = false;
+    let originalTeamCity = getTeamInfo(team).city;
+
+    // --- Step 2b: fallback if the chosen team has no matches in this window ---
     if (teamMatches.length === 0) {
-      return {
-        statusCode: 200,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trip_overview: "", days: [], practical_notes: [] }),
-      };
+      const allMatchesInWindow = allMatches.map((m) => {
+        const venueInfo = getTeamInfo(m.homeTeam.name);
+        return {
+          date: m.utcDate.split("T")[0],
+          home_team: m.homeTeam.name,
+          away_team: m.awayTeam.name,
+          city: venueInfo.city,
+          stadium: venueInfo.stadium,
+        };
+      });
+
+      if (allMatchesInWindow.length === 0) {
+        // Truly nothing happening in Serie A during this window at all
+        return {
+          statusCode: 200,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            trip_overview: `No Serie A matches are scheduled between ${dateFrom} and ${dateTo}. This may fall during the off-season - try a window during the regular season (typically late August through May).`,
+            days: [],
+            practical_notes: [],
+          }),
+        };
+      }
+
+      // Nothing extends the search window - we only consider matches
+      // already within the originally requested dates, per product decision.
+      teamMatches = allMatchesInWindow;
+      isFallback = true;
     }
 
     // --- Step 3: ask Claude to build a structured trip brief ---
     const matchesText = teamMatches
       .map((m) => `- ${m.date}: ${m.home_team} vs ${m.away_team} at ${m.stadium}, ${m.city}`)
       .join("\n");
+
+    const fallbackInstruction = isFallback
+      ? `\n\nIMPORTANT: ${team} has no fixtures scheduled during this travel window. Instead, identify which of the available matches listed below is geographically closest to ${originalTeamCity} (${team}'s home city), using your general knowledge of Italian geography. Build the trip brief around that alternate match. Clearly and honestly state in the trip_overview that ${team} isn't playing during this window, and that this itinerary is built around the closest available match instead. Do not imply ${team} is involved in the match itself.`
+      : "";
 
     const systemPrompt = `You are a knowledgeable Italy travel planner who specializes in combining football (calcio) attendance with authentic Italian travel experiences.
 
@@ -105,7 +136,7 @@ Respond with ONLY valid JSON, no markdown fences, no commentary, matching exactl
   "practical_notes": ["note 1", "note 2", "note 3"]
 }
 
-Cover every day in the requested travel window, not just match days. Sequence travel between cities realistically.`;
+Cover every day in the requested travel window, not just match days. Sequence travel between cities realistically.${fallbackInstruction}`;
 
     const userMessage = `Create a trip brief for a football fan following ${team} between ${dateFrom} and ${dateTo}.
 
