@@ -576,6 +576,7 @@
 
     const overview = document.createElement('div');
     overview.className = 'overview-card';
+    overview.id = 'tripOverview';
     overview.innerHTML = `
       <div class="window-label">Il Viaggio — Trip Overview</div>
       <p>${data.trip_overview}</p>
@@ -628,7 +629,11 @@
     }
 
     output.classList.add('active');
-    output.scrollIntoView({ behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById('tripOverview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
   }
 
   document.getElementById('generateBtn').addEventListener('click', async () => {
