@@ -685,8 +685,8 @@
 
       const data = await res.json();
 
-      if (!data.days || data.days.length === 0) {
-        errorNote.textContent = `No ${team} matches found in this window. Try widening your travel dates.`;
+      if (!data.trip_overview && (!data.days || data.days.length === 0)) {
+        errorNote.textContent = `Something went wrong generating your trip. Please try again.`;
         errorNote.style.display = 'block';
       } else {
         renderOutput(data);
