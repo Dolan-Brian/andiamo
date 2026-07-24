@@ -542,11 +542,11 @@
     teamSelect.appendChild(opt);
   });
 
-  // Default dates: today through +14 days
+  // Default dates: today through +7 days
   const today = new Date();
-  const twoWeeks = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
+  const oneWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
   document.getElementById('dateFrom').value = today.toISOString().split('T')[0];
-  document.getElementById('dateTo').value = twoWeeks.toISOString().split('T')[0];
+  document.getElementById('dateTo').value = oneWeek.toISOString().split('T')[0];
 
   const selectedInterests = new Set();
   document.querySelectorAll('.chip').forEach(chip => {
@@ -639,6 +639,18 @@
 
     if (!dateFrom || !dateTo) {
       errorNote.textContent = 'Please choose a travel window.';
+      errorNote.style.display = 'block';
+      return;
+    }
+
+    const daysDiff = Math.round((new Date(dateTo) - new Date(dateFrom)) / (1000 * 60 * 60 * 24));
+    if (daysDiff > 7) {
+      errorNote.textContent = 'Please keep your travel window to 7 days or fewer for now - longer trips take too long to generate reliably.';
+      errorNote.style.display = 'block';
+      return;
+    }
+    if (daysDiff < 0) {
+      errorNote.textContent = 'Your end date should be after your start date.';
       errorNote.style.display = 'block';
       return;
     }
