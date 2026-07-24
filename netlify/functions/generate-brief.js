@@ -123,7 +123,7 @@ ${matchesText}`;
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 2000,
+        max_tokens: 4096,
         system: systemPrompt,
         messages: [{ role: "user", content: userMessage }],
       }),
@@ -140,7 +140,15 @@ ${matchesText}`;
     // Strip markdown fences if Claude includes them despite instructions
     rawText = rawText.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
 
-    const tripBrief = JSON.parse(rawText);
+    let tripBrief;
+    try {
+      tripBrief = JSON.parse(rawText);
+    } catch (parseErr) {
+      return {
+        statusCode: 502,
+        body: `Claude's response could not be parsed as JSON - it may have been cut off. Try a shorter date range. (${parseErr.message})`,
+      };
+    }
 
     return {
       statusCode: 200,
