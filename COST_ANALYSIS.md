@@ -64,12 +64,22 @@ Netlify's 30-second timeout. This is concrete evidence justifying the
 7-day cap decision: shorter requests aren't just cheaper, they're
 meaningfully faster and safer against the platform's hard timeout limit.
 
-**Next step identified: prompt caching.** Since the system prompt is fixed
-and identical on every call, it is an ideal candidate for Anthropic's
-prompt caching feature, which offers up to 90% cost savings on repeated,
-unchanged input. This has not yet been implemented but is a clear,
-data-justified next optimization now that real usage patterns confirm the
-system prompt is the dominant, unchanging cost driver.
+**Prompt caching evaluated and correctly ruled out.** Since the system prompt
+is fixed and identical on every call, it initially looked like a strong
+candidate for Anthropic's prompt caching feature, which offers up to 90%
+cost savings on repeated, unchanged input. However, caching requires a
+minimum prompt length to activate at all, and that minimum is model-specific
+- for Claude Haiku 4.5, it is 4,096 tokens. Andiamo's system prompt is
+approximately 178 tokens, roughly 23 times below the threshold. Anthropic
+does not error when a prompt is too small to cache; the instruction is
+silently ignored and the call bills at full price regardless, meaning this
+could easily go unnoticed if implemented without verifying the threshold
+first. Artificially padding the prompt to clear the minimum would be
+optimizing for the technique rather than the product, so the correct
+decision is not to implement caching here. This remains worth revisiting
+only if the system prompt naturally grows past ~4,096 tokens for other
+product reasons (e.g. richer instructions, more examples, longer team
+data embedded directly in the prompt).
 
 ### Original estimate (before real data was available)
 
@@ -92,9 +102,11 @@ system prompt is the dominant, unchanging cost driver.
 At this cost level, the model choice is not the primary cost concern for a
 project at Andiamo's current scale - the practical constraint has been
 Netlify's function timeout, not API spend. This would change at meaningfully
-higher volume, where prompt caching (up to 90% savings on repeated system
-prompt tokens) and the Batch API (50% off, for non-real-time use cases)
-would become worth implementing.
+higher volume, where the Batch API (50% off, for non-real-time use cases)
+would become worth implementing. Prompt caching, evaluated above, does not
+apply at Andiamo's current system prompt size regardless of volume - it
+would require the prompt itself to grow substantially, not simply more
+requests.
 
 ## Honest Caveats
 
